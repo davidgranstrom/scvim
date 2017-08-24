@@ -23,6 +23,20 @@
 SCVim.generateTagsFile();
 */
 
+Document {
+    // needed for thisProcess.nowExecutingPath to work.. see Kernel::interpretCmdLine
+    var <path, <dataptr;
+
+    *new {|path, dataptr|
+        ^super.newCopyArgs(path, dataptr);
+    }
+
+    *current {
+        var path = SCVim.currentPath;
+        ^Document(path, true);
+    }
+}
+
 SCVim {
 	classvar nodes, <>vimPath;
 
@@ -72,6 +86,15 @@ SCVim {
 			}
 		};
 	}
+
+    *currentPath {
+        var cmd = "expand(\"%:p\")";
+        var path = "nvr --remote-expr '%'".format(cmd).unixCmdGetStdOut;
+        if (PathName(path).isAbsolutePath) {
+            ^path;
+        }
+        ^nil;
+    }
 
 	// DEPRECTATED in favor of tags system
 	*openClass{ |klass|
